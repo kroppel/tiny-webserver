@@ -1,4 +1,4 @@
-/*
+#/*
  * tiny.c - A simple, iterative HTTP/1.0 Web server that uses the
  *     GET method to serve static and dynamic content.
  *
@@ -83,8 +83,8 @@ void doit(int fd)
     /* Serve dynamic content - using CGI (Common Gateway Interface) -> http://localhost:8000/cgi-bin/adder?1&2*/
     else {
         //is it a valid file and do we have permissions?
-        if (!S_ISREG(sbuf.st_mode) || !(S_IRUSR & sbuf.st_mode)) {              //https://linux.die.net/man/2/stat and https://man7.org/linux/man-pages/man7/inode.7.html
-	        clienterror(fd, filename, "403", "Forbidden", "Could not read file");
+        if (!S_ISREG(sbuf.st_mode) || !(S_IXUSR & sbuf.st_mode)) {              //https://linux.die.net/man/2/stat and https://man7.org/linux/man-pages/man7/inode.7.html
+	        clienterror(fd, filename, "403", "Forbidden", "Could not execute file");
 	        return;
 	    }
 	    serve_dynamic(fd, filename, cgiargs);            //line:netp:doit:servedynamic
