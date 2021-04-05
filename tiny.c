@@ -11,7 +11,7 @@
 /*Function prototypes*/
 void doit(int fd); //überwacht den Serverprozess, managed unterprozesse
 void read_requesthdrs(int fd);
-int parse_uri(int fd, char *uri, char *filename, char *cgiargs); //Welcger content wird angefordert? Statisch/dynamishc?
+int parse_uri(int fd, char *uri, char *filename, char *cgiargs); //Welcher content wird angefordert? Statisch/dynamisch?
 void serve_static(int fd, char *filename, int filesize); //wrappe content in response
 void get_filetype(char *filename, char *filetype);
 void serve_dynamic(int fd, char *filename, char *cgiargs); //-"-
@@ -119,30 +119,29 @@ int parse_uri(int fd, char *uri, char *filename, char *cgiargs)
 {
     char *ptr;
     char buf[MAXLINE];
+    
+    ptr = index(uri, '?');
+    
+    if (ptr) {
+	strcpy(cgiargs, ptr+1);
+
+	*ptr = '\0';
+    }
+    else {
+	strcpy(cgiargs, "");
+    }
+    
+    strcpy(filename, ".");
+    strcat(filename, uri);
 
     if (!strstr(uri, "cgi-bin")) {  /* Static content */
-	    strcpy(cgiargs, "");
-	    strcpy(filename, ".");
-	    strcat(filename, uri);
-	    if (uri[strlen(uri)-1] == '/')
-	        strcat(filename, "index.html");
-	    return 1;
+	
+	if (uri[strlen(uri)-1] == '/')
+	    strcat(filename, "index.html");
+	    
+	return 1;
     }
     else {  /* Dynamic content */
-
-	ptr = index(uri, '?');
-
-        if (ptr) {
-            strcpy(cgiargs, ptr+1);
-
-            *ptr = '\0';
-	}
-	else {
-	    strcpy(cgiargs, "");
-	}
-
-        strcpy(filename, ".");
-        strcat(filename, uri);
 
 	sprintf(buf, "\r\nURI: %s\r\nCGIARGS: %s\r\nFILENAME: %s\r\n", uri, cgiargs, filename);
 	write(fd, buf, strlen(buf));
